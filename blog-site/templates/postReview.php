@@ -1,6 +1,10 @@
 <?php
 
 function getTemplate($post) {
+	$tags = "";
+	foreach ($post["tags"] as $tag) {
+		$tags .= sprintf('<a><li> %s </li> ' , $tag);
+	}
 	echo	sprintf('<div class="col-lg-6">
 				<div class="blog-post">
 					<div class="blog-thumb">
@@ -22,8 +26,7 @@ function getTemplate($post) {
 								<div class="col-lg-12">
 									<ul class="post-tags">
 										<li><i class="fa fa-tags"></i></li>
-										<li><a href="#">Best Templates</a>,</li>
-										<li><a href="#">TemplateMo</a></li>
+										%s
 									</ul>
 								</div>
 							</div>
@@ -35,8 +38,9 @@ function getTemplate($post) {
 			$post["id"] ,
 			$post["post_title"] ,
 			$post["user_name"] ,
-			$post["comment_count"] ,
+			count($post["comments"]) ,
 			$post["publish_date"] ,
-			(strlen($s = $post["content"]) > 40) ? substr($s, 0, 37) . "..." : $s
+			(strlen($s = $post["content"]) > 40) ? substr($s, 0, 37) . "..." : $s ,
+			$tags
 		);
 }

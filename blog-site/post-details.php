@@ -1,11 +1,20 @@
-<?php 
+<?php
     require_once "./initializer.php";
     require "./templates/header.php";
+    require_once "./validate.php";
 
-    if(isset($_GET) && array_key_exists("id" , $_GET)) {
-        
+    if( isset($_GET) && 
+        array_key_exists("id" , $_GET) &&
+        \validation\validate("number" , $_GET["id"])) {
+
+        $result = $connection->getPost($_GET["id"]);
+        if($result["state"] === 0) {
+            $post = $result["data"][0];
+        }
+
     } else {
         header("Location: ./index.php");
+        die();
     }
 ?>
 
@@ -40,22 +49,26 @@
                       <img src="assets/images/blog-post-02.jpg" alt="">
                     </div>
                     <div class="down-content">
-                      <span>Lifestyle</span>
-                      <a href="post-details.html"><h4>Aenean pulvinar gravida sem nec</h4></a>
+                      <span><?php echo $post["category_name"]; ?></span>
+                      <h4><?php echo $post["post_title"]; ?></h4>
                       <ul class="post-info">
-                        <li><a href="#">Admin</a></li>
-                        <li><a href="#">May 12, 2020</a></li>
-                        <li><a href="#">10 Comments</a></li>
+                        <li><a href="#"><?php echo $post["user_name"]; ?></a></li>
+                        <li><a href="#"><?php echo $post["publish_date"]; ?></a></li>
+                        <li><a href="#"><?php echo count($post["comments"]);?> Comments</a></li>
                       </ul>
-                      <p>You can browse different tags such as <a rel="nofollow" href="https://templatemo.com/tag/multi-page" target="_parent">multi-page</a>, <a rel="nofollow" href="https://templatemo.com/tag/resume" target="_parent">resume</a>, <a rel="nofollow" href="https://templatemo.com/tag/video" target="_parent">video</a>, etc. to see more CSS templates. Sed hendrerit rutrum arcu, non malesuada nisi. Sed id facilisis turpis. Donec justo elit, dapibus vel ultricies in, molestie sit amet risus. In nunc augue, rhoncus sed libero et, tincidunt tempor nisl. Donec egestas, quam eu rutrum ultrices, sapien ante posuere nisl, ac eleifend eros orci vel ante. Pellentesque vitae eleifend velit. Etiam blandit felis sollicitudin vestibulum feugiat.
-                      <br><br>Donec tincidunt leo nec magna gravida varius. Suspendisse felis orci, egestas ac sodales quis, venenatis et neque. Vivamus facilisis dignissim arcu et blandit. Maecenas finibus dui non pulvinar lacinia. Ut lacinia finibus lorem vel porttitor. Suspendisse et metus nec libero ultrices varius eget in risus. Cras id nibh at erat pulvinar malesuada et non ipsum. Suspendisse id ipsum leo.</p>
-                      <div class="post-options">
+                        <p>
+                            <?php echo $post["content"]; ?>
+                        </p>
+                        <div class="post-options">
                         <div class="row">
                           <div class="col-6">
                             <ul class="post-tags">
                               <li><i class="fa fa-tags"></i></li>
-                              <li><a href="#">Best Templates</a>,</li>
-                              <li><a href="#">TemplateMo</a></li>
+                              <?php
+                                foreach ($post["tags"] as $tag) {
+                                    echo sprintf('<li><a href="#"> %s </a></li> ' , $tag);
+                                }
+                              ?>
                             </ul>
                           </div>
                           <div class="col-6">
@@ -73,46 +86,30 @@
                 <div class="col-lg-12">
                   <div class="sidebar-item comments">
                     <div class="sidebar-heading">
-                      <h2>4 comments</h2>
+                      <h2><?php echo count($post["comments"]);?> Comments</h2>
                     </div>
                     <div class="content">
-                      <ul>
-                        <li>
-                          <div class="author-thumb">
-                            <img src="assets/images/comment-author-01.jpg" alt="">
-                          </div>
-                          <div class="right-content">
-                            <h4>Charles Kate<span>May 16, 2020</span></h4>
-                            <p>Fusce ornare mollis eros. Duis et diam vitae justo fringilla condimentum eu quis leo. Vestibulum id turpis porttitor sapien facilisis scelerisque. Curabitur a nisl eu lacus convallis eleifend posuere id tellus.</p>
-                          </div>
-                        </li>
-                        <li class="replied">
-                          <div class="author-thumb">
-                            <img src="assets/images/comment-author-02.jpg" alt="">
-                          </div>
-                          <div class="right-content">
-                            <h4>Thirteen Man<span>May 20, 2020</span></h4>
-                            <p>In porta urna sed venenatis sollicitudin. Praesent urna sem, pulvinar vel mattis eget.</p>
-                          </div>
-                        </li>
-                        <li>
-                          <div class="author-thumb">
-                            <img src="assets/images/comment-author-03.jpg" alt="">
-                          </div>
-                          <div class="right-content">
-                            <h4>Belisimo Mama<span>May 16, 2020</span></h4>
-                            <p>Nullam nec pharetra nibh. Cras tortor nulla, faucibus id tincidunt in, ultrices eget ligula. Sed vitae suscipit ligula. Vestibulum id turpis volutpat, lobortis turpis ac, molestie nibh.</p>
-                          </div>
-                        </li>
-                        <li class="replied">
-                          <div class="author-thumb">
-                            <img src="assets/images/comment-author-02.jpg" alt="">
-                          </div>
-                          <div class="right-content">
-                            <h4>Thirteen Man<span>May 22, 2020</span></h4>
-                            <p>Mauris sit amet justo vulputate, cursus massa congue, vestibulum odio. Aenean elit nunc, gravida in erat sit amet, feugiat viverra leo.</p>
-                          </div>
-                        </li>
+                      <ul>    
+
+                        <?php 
+                            foreach ($post["comments"] as $comment) {
+                        ?>
+                        
+                            <li>
+                              <div class="author-thumb">
+                                <img src="assets/images/comment-author-03.jpg" alt="">
+                              </div>
+                              <div class="right-content">
+                                <h4><?php echo $comment["username"]; ?>
+                                <span><?php echo $comment["comment_date"] ?></span></h4>
+                                <p><?php echo $comment["comment"]; ?></p>
+                              </div>
+                            </li>
+                        
+                        <?php
+                            }
+                        ?>
+
                       </ul>
                     </div>
                   </div>
@@ -123,9 +120,9 @@
                       <h2>Your comment</h2>
                     </div>
                     <div class="content">
-                      <form id="comment" action="#" method="post">
+                      <form id="comment" action="sendComment.php" method="post">
                         <div class="row">
-                          <div class="col-md-6 col-sm-12">
+<!--                           <div class="col-md-6 col-sm-12">
                             <fieldset>
                               <input name="name" type="text" id="name" placeholder="Your name" required="">
                             </fieldset>
@@ -139,7 +136,8 @@
                             <fieldset>
                               <input name="subject" type="text" id="subject" placeholder="Subject">
                             </fieldset>
-                          </div>
+                          </div> -->
+                          <input type="hidden" name="id" value="<?php echo $post["id"]; ?>">
                           <div class="col-lg-12">
                             <fieldset>
                               <textarea name="message" rows="6" id="message" placeholder="Type your comment" required=""></textarea>
