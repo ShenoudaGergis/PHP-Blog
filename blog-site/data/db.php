@@ -21,7 +21,7 @@ class DB {
 	public function userLogin($email , $password) {
 		$result = mysqli_query($this->conn , 
 			sprintf("SELECT id , username , type FROM users WHERE email='%s' and password='%s'" ,
-					$email , $password
+					$email , md5($password)
 			)
 		);
 		if($result === false) return ["state" => -1 , "error" => mysqli_error($this->conn)];
@@ -43,7 +43,7 @@ class DB {
 	) {
 		$result = mysqli_query($this->conn ,
 			sprintf("INSERT INTO users (id , name , username , password , email , phone , type) VALUES (null , '%s' , '%s' , '%s' , '%s' , %d , %d);" , 
-					$name , $username , $password , $email , $phone , $type
+					$name , $username , md5($password) , $email , $phone , $type
 		));
 
 		if($result === false) return ["state" => -1 , "error" => mysqli_error($this->conn)];
@@ -283,4 +283,3 @@ $connection = new DB();
 // print_r($connection->addComment(10 , 6 , "by the name of jesus christ"));
 // print_r($connection->getUserPosts(10));
 // print_r($connection->getTags());
-

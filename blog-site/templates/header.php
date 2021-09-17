@@ -26,13 +26,13 @@
   <body>
 
     <!-- ***** Preloader Start ***** -->
-    <div id="preloader">
+<!--     <div id="preloader">
         <div class="jumper">
             <div></div>
             <div></div>
             <div></div>
         </div>
-    </div>  
+    </div>   -->
     <!-- ***** Preloader End ***** -->
 
     <!-- Header -->
@@ -49,32 +49,51 @@
                     <a class="nav-link" href="index.php">Home</a>
                 </li>
 
-                <!-- <li class="nav-item active">
-                <a class="nav-link" href="blog.php">Blog Entries</a>
-                </li> -->
-                <!-- <li class="nav-item">
-                <a class="nav-link" href="post-details.php">Post Details</a>
-                </li> -->
                 <li class="nav-item">
                     <a class="nav-link" href="contact.php">Contact Us</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="about.php">About Us</a>
                 </li>
+
                 <?php 
                     if(!isset($_SESSION["user"])) {
-                      echo '<li class="nav-item">
-                              <a class="nav-link" href="login.php">Login</a>
-                            </li>';
-                      echo '<li class="nav-item">
-                              <a class="nav-link" href="register.php">Register</a>
-                            </li>';
+                ?>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.php">Login</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="register.php">Register</a>
+                    </li>
+
+                <?php
                     } else {
-                      echo '<li class="nav-item">
-                              <a class="nav-link" href="logout.php">Logout</a>
-                            </li>';                        
+                ?>      
+                    <?php
+                        if($_SESSION["user"]["type"] == 1) { 
+                    ?>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="admin.php">Admin</a>
+                        </li>            
+
+                    <?php
+                        }
+                    ?>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.php">My Posts</a>
+                    </li>            
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="logout.php">Logout</a>
+                    </li>
+                
+                <?php
                     }
                 ?>
+                    
             </ul>
           </div>
         </div>
