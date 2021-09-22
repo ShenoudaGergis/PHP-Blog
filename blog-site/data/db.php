@@ -55,6 +55,45 @@ class DB {
 
 	//-----------------------------------------------------------------------------------
 
+	public function addPost($userID , $title , $content , $image , $cID , $tIDs) {
+		$result = 
+			mysqli_query(
+				$this->conn ,
+				sprintf('INSERT INTO posts 
+					(id , 
+				     title , 
+				     content , 
+				     image , 
+				     publish_date , 
+				     created_at , 
+				     category_id , 
+				     user_id)
+					 VALUES (NULL , "%s" , "%s" , "%s" , CURRENT_TIMESTAMP , CURRENT_TIMESTAMP , %d , %d)' , 
+				$title , 
+				$content ,
+				$image ,
+				$cID ,
+				$userID)
+			);
+
+		if($result === false) return ["state" => -1 , "error" => mysqli_error($this->conn)];
+
+		$newPostID = mysqli_insert_id($this->conn);
+		foreach ($tIDs as $id) {
+			$result = mysqli_query($this->conn , sprintf(
+					  		"INSERT INTO post_tags (post_id , tag_id) 
+					  		values (%d , %d)" , $newPostID ,  $id));
+			if($result === false) return ["state" => -1 , "error" => mysqli_error($this->conn)];
+		}
+
+		return [
+			"state" => 0 ,
+			"data"  => true
+		];	
+	}
+
+	//-----------------------------------------------------------------------------------
+
 	// public function getUserPosts($id) {
 	// 	$result = mysqli_query($this->conn ,
 	// 		sprintf("
@@ -157,13 +196,20 @@ class DB {
 		# 5 : userID | from | to | query | category
 		# 6 : userID | from | to | query | category | tag
 
-
+		// print_r(gettype($args));
+		// var_dump($args);
+		// die();
 		$builder = "WHERE 1=1";
 		switch (count($args)) {
 
 			case 6 :
-				if($args[5] !== null)
-					$builder .= " AND posts.id IN (SELECT post_id FROM post_tags WHERE tag_id = $args[5])";
+				if($args[5] !== null) {
+					$tagClause = [];					
+					for($i = 0;$i < count($args[5]);$i++) {
+						$tagClause[$i] = "tag_id = " . $args[5][$i];
+					}
+					$builder .= sprintf(" AND posts.id IN (SELECT post_id FROM post_tags WHERE %s)" , join(" OR " , $tagClause));
+				}
 
 			case 5 :
 				if($args[4] !== null)
@@ -193,6 +239,7 @@ class DB {
 		$result = mysqli_query($this->conn , 
 			sprintf("SELECT 
 						posts.id ,
+						posts.image ,
 				    	categories.name as category_name ,
 				    	posts.title AS post_title ,
 				    	posts.content , 
@@ -271,15 +318,103 @@ class DB {
 
 	//---------------------------------------------------------------------
 
-	public function searchPosts($query , $category , $tag) {
-
+	public function isTagFound($id) {
+		$result = mysqli_query($this->conn , "SELECT id FROM tags WHERE id=$id");
+		if($result === false) return ["state" => -1 , "error" => mysqli_error($this->conn)];
+		return [
+			"state" => 0 ,
+			"data"  => mysqli_fetch_assoc($result) !== null
+		];
 	}
 
+	//---------------------------------------------------------------------
+
+	public function isCategoryFound($id) {
+		$result = mysqli_query($this->conn , "SELECT id FROM categories WHERE id=$id");
+		if($result === false) return ["state" => -1 , "error" => mysqli_error($this->conn)];
+		return [
+			"state" => 0 ,
+			"data"  => mysqli_fetch_assoc($result) !== null
+		];
+	}
+
+	//---------------------------------------------------------------------
+
+	public function userLikesPost($userID , $postID) {
+		$result = mysqli_query($this->conn , "SELECT id FROM likes WHERE post_id=$postID AND user_id=$userID");
+		if($result === false) return ["state" => -1 , "error" => mysqli_error($this->conn)];
+		return [
+			"state" => 0 ,
+			"data"  => mysqli_fetch_assoc($result) !== null
+		];
+	}
+
+	//---------------------------------------------------------------------
+
+	public function getPostLikes($postID) {
+		$result = mysqli_query($this->conn , "SELECT count(id) as sum FROM likes WHERE post_id=$postID");
+		if($result === false) return ["state" => -1 , "error" => mysqli_error($this->conn)];
+		return [
+			"state" => 0 ,
+			"data"  => mysqli_fetch_assoc($result)["sum"]
+		];
+	}
+
+	//---------------------------------------------------------------------
+
+	public function toggleUserPostLike($userID , $postID) {
+		$r = $this->userLikesPost($userID , $postID);
+		if($r["state"] === 0) {
+			if($r["data"] === true) {
+				//remove like
+				$result = mysqli_query($this->conn , "DELETE FROM likes WHERE user_id = $userID AND post_id = $postID");
+				if($result === false) return ["state" => -1 , "error" => mysqli_error($this->conn)];
+				return [
+					"state" => 0 ,
+					"data"  => [
+						"action" => -1 ,
+						"total"  => ($t = $this->getPostLikes($postID))["state"] === 0 ? $t["data"] : -1
+					]
+				];
+
+			} else {
+				//add like
+				$result = mysqli_query($this->conn , "INSERT INTO likes (id , like_date , post_id , user_id) VALUES (NULL , CURRENT_TIMESTAMP , $postID , $userID)");
+				if($result === false) return ["state" => -1 , "error" => mysqli_error($this->conn)];
+				return [
+					"state" => 0 ,
+					"data"  => [
+						"action" => 1 ,
+						"total"  => ($t = $this->getPostLikes($postID))["state"] === 0 ? $t["data"] : -1
+					]
+				];
+
+			}
+		} else return $r;
+		
+	}
+
+	//---------------------------------------------------------------------
+
+	public function deletePost($userID , $postID) {
+		$query = "DELETE FROM posts WHERE id = $postID " . (($userID) ? "AND user_id = $userID" : "");
+		$result = mysqli_query($this->conn ,  $query);
+		if($result === false) return ["state" => -1 , "error" => mysqli_error($this->conn)];
+		return [
+			"state" => 0 ,
+			"data"  => true
+		];
+
+	}
 }
 
 $connection = new DB();
 // print_r($connection->getRecentPosts(0 , 4));
-// print_r($connection->getPost(0 , 4));
+// print_r($connection->getPost(5 , 0 , 10 , null , null , [1 , 2]));
 // print_r($connection->addComment(10 , 6 , "by the name of jesus christ"));
 // print_r($connection->getUserPosts(10));
 // print_r($connection->getTags());
+// print_r($connection->isCategoryFound(1));
+// print_r($connection->getPostLikes(32));
+// print_r($connection->toggleUserPostLike(5 , 29));
+// print_r($connection->deletePost(5 , 7));

@@ -4,6 +4,9 @@ namespace validation;
 
 function validate($flag , ...$values) {
 	switch ($flag) {
+		case "string" :
+			return strlen(trim($values[0])) !== 0;
+
 		case "email" :
 			return preg_match("/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/", $values[0]);
 			break;
@@ -28,4 +31,10 @@ function validate($flag , ...$values) {
 	}
 }
 
-// print(preg_match("/^df$/", "df"));
+
+//-----------------------------------------------------------------------------
+
+function isFileImage($path) {
+	if(@is_array(getimagesize($path))) return true;
+	else return false;
+}

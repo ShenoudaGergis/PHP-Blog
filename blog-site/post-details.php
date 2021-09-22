@@ -79,6 +79,23 @@
                                         </div>
                                     </div>
                                 </div>
+                                <br />
+                                <?php
+                                    if(isset($_SESSION["user"])) {
+                                        $r = $connection->userLikesPost($_SESSION["user"]["id"] , $post["id"]);
+                                        if($r["state"] === 0) {
+                                            $inner = ($r["data"]) ? "Dislike" : "Like"; 
+                                            echo '<button id="likeBtn" onclick="toggleLike('. $_SESSION["user"]["id"] . ',' . $post["id"] .')" style="float: right;" class="btn btn-primary">'. $inner .'</button>';        
+                                        }
+                                    }
+                                    $r = $connection->getPostLikes($post["id"]);
+                                    if($r["state"] === 0) {
+                                        $count = $r["data"]; 
+                                        echo '<i id="postLikes">' . $count .' Likes </i>';        
+                                    }
+
+                                ?>
+
                             </div>
                         </div>
                 

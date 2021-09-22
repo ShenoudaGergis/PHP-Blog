@@ -18,13 +18,13 @@
 <section class="blog-posts grid-system">
     <div class="container">
         <div class="row">
-            
             <div class="col-md-8">
+
                 <?php 
                     getPostsSection(null , "index.php");
                 ?>
-            </div>
 
+            </div>
             <div class="col-lg-4">
                 <div class="sidebar">
                     <div class="row">
@@ -49,9 +49,3 @@
 <?php 
     require "./templates/footer.php";
 ?>
-
-<!--                 <div class="row">
-                    <div class="col-md-12">
-                        <button class="btn btn-outline-primary btn-block">Create Post</button>                
-                    </div>
-                </div> -->

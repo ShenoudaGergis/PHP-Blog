@@ -1,3 +1,8 @@
+<?php
+    require_once "./templates/category-select-section.php";
+    require_once "./templates/tags-select-section.php";
+?>
+
 <?php 
     function getSearchSection() {
         global $connection;
@@ -13,43 +18,24 @@
                 <div class="col-lg-4">
                     <label><h6>Category </h6></label>                            
                 </div>
-                <div class="col-lg-8" style="padding-bottom: 20px">                                
-                    <select name="category" class="form-control form-control-sm">
-                        <option value="*">All</option>
-                    <?php
-                        $categories = $connection->getCategories();
-                        if($categories["state"] === 0) {
-                            foreach ($categories["data"] as $category) {
-                    ?>
-                        <option value="<?php echo $category["id"]; ?>"><?php echo $category["name"]; ?></option>
-                    <?php
-                            }
-                        }
-                    ?>
+                <div class="col-lg-8" style="padding-bottom: 20px">
 
-                    </select>                       
+                    <?php
+                        getCategorySelect(true);
+                    ?>                                
+                              
                 </div>
 
                 <div class="col-lg-4">
                     <label><h6>Tag </h6></label>                            
                 </div>
                 <div class="col-lg-8">                                
-                    <select name="tag" class="form-control form-control-sm">
-                        <option value="*">All</option>
-                    <?php
-                        $tags = $connection->getTags();
-                        if($tags["state"] === 0) {
-                            foreach ($tags["data"] as $tag) {
-                    ?>
 
-                        <option value="<?php echo $tag["id"]; ?>"><?php echo $tag["name"]; ?></option>
-                    
                     <?php
-                            }
-                        }
-                    ?>
+                        getTagsSelect(true);
+                    ?>                                
 
-                    </select>                       
+
                 </div>
                 <div class="col-lg-12" style="padding-top: 20px;">
                     <button class="btn btn-block btn-md btn-outline-primary" type="submit">SEARCH</button>

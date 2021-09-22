@@ -1,6 +1,9 @@
 <?php
-	require_once "./utils/validate.php";
 	require_once "./initializer.php";
+	// require_once "./utils/validate.php";
+	require_once "./utils/misc.php";
+	require_once "./templates/pagination-section.php";
+
 ?>
 
 <?php
@@ -45,112 +48,70 @@
 	}
 ?>
 
-<?php
-	function generateParameters($page , $query , $category , $tag) {
-		$builder = "";
-		if($page     !== null) $builder .= "page=$page&";
-		if($query    !== null) $builder .= "query=$query&";
-		if($category !== null) $builder .= "category=$category&";
-		if($tag      !== null) $builder .= "tag=$tag&";
-		return $builder;
-	}
-?>
-
 
 <?php
 	function getPostsSection($userID , $file) {
 
 		global      $connection;
-		$page     = $_GET["page"];
-		$query    = $_GET["query"];
-		$category = $_GET["category"];
-		$tag      = $_GET["tag"];
+	
+		$p = fetchParams([
+			"query"    => ["string" , null] ,
+			"page"     => ["number" , 1] ,
+			"category" => ["number" , null] ,
+			"tag"      => ["number" , null] ,
+		]);
 
+		$page     = $p["page"];
+		$query    = $p["query"];
+		$category = $p["category"];
+		$tag      = $p["tag"];
 
-		if(trim($query) === "") $query = null;
+		$ppp    = 4;
 
-		if(\validation\validate("number" , $category)) $category = intval($category);
-		else $category = null;
+        $from   = ($page * $ppp) - $ppp;
+        $result = $connection->getPost($userID , 
+        							   $from , 
+        							   $ppp , 
+        							   $query , 
+        							   $category , 
+        							   $tag);
 
-		if(\validation\validate("number" , $page)) {
-			$page = intval($page);
-			if($page === 0) $page = 1;
-		}
-		else $page = 1;
-
-		if(\validation\validate("number" , $tag)) $tag = intval($tag);
-		else $tag = null;
-
-
-		$ppp    = 2;
-        $from   = ($page - 1) * $ppp;
-        $result = $connection->getPost($userID , $from , $ppp , $query , $category , $tag);
         if($result["state"] === 0) $posts = $result["data"];
         else $posts = [];
 
-		?>
+?>
+
+        <?php
+            if(count($posts) !== 0) {
+        ?>
 
         <div class="all-blog-posts">
             <div class="row">
 
-        <?php
-	        foreach ($posts as $post) {
+        <?php 
+        	foreach ($posts as $post) {
 	            getPostCard($post);
 	        }
         ?>
-
-        <div class="col-lg-12">
-            <ul class="page-numbers">
-
-        <?php
-            if(count($posts) !== 0) {
-
-                if($page === 2) {
-                    echo sprintf('<li><a href="./%s?%s"><<</a></li>' , $file , generateParameters(1 , $query , $category , $tag));
-                    echo sprintf('<li><a href="./%s?%s">1</a></li>'  , $file , generateParameters(1 , $query , $category , $tag));
-                }
-                if($page > 2) {
-                    echo sprintf('<li><a href="./%s?%s"><<</a></li>' , $file , generateParameters($page - 1 , $query , $category , $tag));
-                    echo sprintf('<li><a href="./%s?%s">%d</a></li>' , $file , generateParameters($page - 2 , $query , $category , $tag) , $page - 2);
-                    echo sprintf('<li><a href="./%s?%s">%d</a></li>' , $file , generateParameters($page - 1 , $query , $category , $tag) , $page - 1);
-                }
-                echo sprintf('<li class="active"><a href="#">%d</a></li>' , $page);
-
-				$result = $connection->getPost($userID , $from + $ppp * 1 , $ppp , $query , $category , $tag);
-                if($result["state"] === 0) $posts = $result["data"];
-                else $posts = [];
-                if(count($posts) !== 0) {
-                    echo sprintf('<li><a href="./%s?%s">%d</a></li>' , $file , generateParameters($page + 1 , $query , $category , $tag) , $page + 1);
-
-					$result = $connection->getPost($userID , $from + $ppp * 2 , $ppp , $query , $category , $tag);
-                    if($result["state"] === 0) $posts = $result["data"];
-                    else $posts = [];
-                    if(count($posts) !== 0) {
-                    	echo sprintf('<li><a href="./%s?%s">%d</a></li>' , $file , generateParameters($page + 2 , $query , $category , $tag) , $page + 2);
-                    	echo sprintf('<li><a href="./%s?%s">>></a></li>' , $file , generateParameters($page + 1 , $query , $category , $tag) , $page + 1);
-                    } else {
-                    	echo sprintf('<li><a href="./%s?%s">>></a></li>' , $file , generateParameters($page + 1 , $query , $category , $tag) , $page + 1);
-                    }
-                }
-
-
-            } else if($page !== 1) {
-        ?>
-            <script type="text/javascript">
-                window.location.href = "./" . <?php echo $file ?> . "?page=1";
-            </script>
-        <?php
-            }
-        ?>
-
-                	</ul>
-                </div>              
             </div>
         </div>
+        <div class="row">
+        	<div class="col-lg-12">        		
+			<?php
+				paginate(
+					$page , 
+					$file , 
+					$ppp , 
+					$userID ,
+					$query ,
+					$category ,
+					$tag
+				);
+			?>
+			</div>
+		</div>
 
-
-
-<?php
-
-	}
-?>
+		<?php
+				}
+			}
+		?>
