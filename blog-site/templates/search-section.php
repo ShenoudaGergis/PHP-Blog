@@ -21,7 +21,7 @@
                 <div class="col-lg-8" style="padding-bottom: 20px">
 
                     <?php
-                        getCategorySelect(true);
+                        getCategorySelect(true , null);
                     ?>                                
                               
                 </div>
@@ -32,7 +32,7 @@
                 <div class="col-lg-8">                                
 
                     <?php
-                        getTagsSelect(true);
+                        getTagsSelect(true , []);
                     ?>                                
 
 

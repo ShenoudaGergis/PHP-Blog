@@ -1,5 +1,5 @@
 <?php
-	function getTagsSelect($all) {
+	function getTagsSelect($all , $selectedIDs) {
 		global $connection;
 ?>
     <select name="tag[]" multiple size="4" class="form-control form-select-lg">
@@ -12,7 +12,7 @@
             foreach ($tags["data"] as $tag) {
     ?>
 
-        <option value="<?php echo $tag["id"]; ?>"><?php echo $tag["name"]; ?></option>
+        <option <?php echo (in_array($tag["id"] , $selectedIDs)) ? "selected" : ""; ?> value="<?php echo $tag["id"]; ?>"><?php echo $tag["name"]; ?></option>
     
     <?php
             }

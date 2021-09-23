@@ -1,5 +1,5 @@
 <?php
-    function getCategorySelect($all) {
+    function getCategorySelect($all , $selectedID) {
         global $connection;
 ?>
     <select name="category" class="form-control form-select-lg">
@@ -11,7 +11,7 @@
         if($categories["state"] === 0) {
             foreach ($categories["data"] as $category) {
     ?>
-        <option value="<?php echo $category["id"]; ?>"><?php echo $category["name"]; ?></option>
+        <option <?php echo (intval($category["id"]) === $selectedID) ? "selected" : ""; ?> value="<?php echo $category["id"]; ?>"><?php echo $category["name"]; ?></option>
     <?php
             }
         }

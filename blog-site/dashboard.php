@@ -56,13 +56,13 @@
 
 		                <div class="col-lg-3" style="padding-bottom: 20px">
 		                    <?php
-		                        getCategorySelect(true);
+		                        getCategorySelect(true , null);
 		                    ?>                                
 		                </div>
 
 		                <div class="col-lg-3">                                
 		                    <?php
-		                        getTagsSelect(true);
+		                        getTagsSelect(true , []);
 		                    ?>                                
 		                </div>
 

@@ -33,8 +33,8 @@ require_once "./templates/tags-select-section.php";
 				$errors[] = "image";
 			else {
 				$imageName = time();
-				if(!move_uploaded_file($_FILES["image"]["tmp_name"] , "./post-images/" . $imageName . "jpeg"))
-					$errors[] = "image";
+				$move = move_uploaded_file($_FILES["image"]["tmp_name"] , "./post-images/" . $imageName);
+				if(!$move) $errors[] = "image";
 			}
 		} else {
 			$errors[] = "image";
@@ -76,88 +76,112 @@ require_once "./templates/tags-select-section.php";
 
 <br />
 <div class="row" style="padding-left: 40px;padding-top: 20px">
-	<div class="col-md-12 text-danger">
-    	<?php
-    		echo (in_array("process" , $errors)) ? "Error In Creating Post" : "";
-    	?>
-	</div>			
+	<?php
+		if(in_array("process" , $errors)) {
+	?>
+	<div class="col-md-12 alert alert-danger" role="alert">
+		Canot Create Post
+	</div>
+	<?php
+	}
+	?>		
 </div>
 
-<div style="margin-top: 20px;padding: 40px;">
+<div style="padding: 30px;">
 	<h4>Create New Post</h4><br /><br />
 	<form action="./new-post.php" method="post" enctype="multipart/form-data">
 		<div class="row">
 			<label class="col-md-1 form-label">Title</label>
-			<div class="col-md-9">
-				<input name="title" type="text" class="form-control" placeholder="Post Title...">
+			<div class="col-md-8">
+				<input name="title" value="<?php if(!empty($r["title"])) echo $r["title"];?>" type="text" class="form-control" placeholder="Post Title...">
 			</div>
-		    <div class="col-md-2 text-danger">
-		    	<?php
-		    		echo (in_array("title" , $errors)) ? "Invalid Title" : "";
+				<?php
+					if(in_array("title" , $errors)) {
 		    	?>
-			</div>
+				<div class="col-md-3 alert alert-danger" role="alert">
+		    		Invalid Title
+		    	</div>
+		    	<?php
+		    	}
+		    	?>
 		</div>
 
 		<br />
 		<div class="row">
-			<label class="col-md-1 form-label">Content</label>
-			<div class="col-md-9">
-				<textarea name="content" class="form-control" rows="4" placeholder="Post Content..."></textarea>
+			<label class="col-md-1 label-info">Content</label>
+			<div class="col-md-8">
+				<textarea name="content" class="form-control" rows="4" placeholder="Post Content..."><?php if(!empty($r["content"])) echo $r["content"];?></textarea>
 			</div>
-		    <div class="col-md-2 text-danger">
-		    	<?php
-		    		echo (in_array("content" , $errors)) ? "Invalid Content" : "";
+				<?php
+					if(in_array("content" , $errors)) {
 		    	?>
-			</div>
+				<div class="col-md-3 alert alert-danger" role="alert">
+		    		Invalid Content
+		    	</div>
+		    	<?php
+		    	}
+		    	?>
 		</div>
 
 
 		<br />
 		<div class="row">
 			<label class="col-md-1 form-label">Categories</label>
-			<div class="col-md-9">
+			<div class="col-md-8">
 				<?php
-					getCategorySelect(false);
+					getCategorySelect(false , (!empty($r["category"])) ? $r["category"] : null);
 				?>
 			</div>
-		    <div class="col-md-2 text-danger">
-		    	<?php
-		    		echo (in_array("category" , $errors)) ? "Invalid Category" : "";
+				<?php
+					if(in_array("category" , $errors)) {
 		    	?>
-			</div>
+				<div class="col-md-3 alert alert-danger" role="alert">
+		    		Invalid Category
+		    	</div>
+		    	<?php
+		    	}
+		    	?>
 		</div>
 
 		<br />
 		<div class="row">
 			<label class="col-md-1 form-label">Tags</label>
-			<div class="col-md-9">
+			<div class="col-md-8">
 				<?php
-					getTagsSelect(false);
+					getTagsSelect(false , (!empty($r["tag"])) ? $r["tag"] : []);
 				?>
 			</div>
-		    <div class="col-md-2 text-danger">
 				<?php
-		    		echo (in_array("tag" , $errors)) ? "Invalid Tag" : "";
+					if(in_array("tag" , $errors)) {
 		    	?>
-			</div>
+				<div class="col-md-3 alert alert-danger" role="alert">
+		    		Invalid Tag
+		    	</div>
+		    	<?php
+		    	}
+		    	?>
 		</div>
 
 		<br />
 		<div class="row">
 			<label class="col-md-1 form-label">Image</label>
-			<div class="col-md-9">
+			<div class="col-md-8">
 				<input name="image" type="file" accept="image/*" class="form-control"/>			
 			</div>
-		    <div class="col-md-2 text-danger">
 				<?php
-		    		echo (in_array("image" , $errors)) ? "Invalid Image" : "";
+					if(in_array("image" , $errors)) {
 		    	?>
-			</div>
+				<div class="col-md-3 alert alert-danger" role="alert">
+		    		Invalid Image
+		    	</div>
+		    	<?php
+		    	}
+		    	?>
 		</div>
 
-		<br />
-		<div class="col-md-10">
-			<button class="btn btn-primary" style="float: right;" type="submit">Create New Post</button>		
+		<br /><br />
+		<div class="col-md-9">
+			<button class="btn btn-primary btn-block" type="submit">Create New Post</button>		
 		</div>
 
 	</form>

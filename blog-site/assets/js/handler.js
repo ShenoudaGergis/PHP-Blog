@@ -24,24 +24,15 @@ function sendRequest(path , body , onFinish) {
 //-----------------------------------------------------------------------------
 
 function toggleLike(userID , postID) {
-	fetch("./api/like.php" , {
-		method  : "POST" ,
-		headers : {
-			"credentials"  : 'include',
-			"Content-Type" : "application/json"
-		} ,
-		body : JSON.stringify({
-			"userID" : userID ,
-			"postID" : postID
-		})
-	}).then((res) => {
-		return res.json()
-	}).then((d) => {
+	sendRequest("./api/like.php" , {
+		"userID" : userID ,
+		"postID" : postID
+	} , (d) => {
 		if(d["state"] !== 0) return;
 		document.getElementById("postLikes").innerText = d["data"]["total"] + " Likes"; 
 		document.getElementById("likeBtn").innerText = (d["data"]["action"] === -1) ? "Like" : "Dislike"; 
 
-	})
+	});
 }
 
 //-----------------------------------------------------------------------------
