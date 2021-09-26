@@ -9,5 +9,5 @@ if(!isset($_SESSION["user"])) echo json_encode([
 
 $_POST = json_decode(file_get_contents('php://input'), true);
 echo json_encode(
-	$connection->deletePost($_SESSION["user"]["id"] , $_POST["postID"])
+	$connection->toggleUserCommentLike($_SESSION["user"]["id"] , $_POST["commentID"])
 );

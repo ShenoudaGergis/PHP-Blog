@@ -1,5 +1,7 @@
 <?php
 require_once "./initializer.php";
+require      "./check-block.php";
+
 
 if(!isset($_SESSION["user"])) header("Location: ./login.php");
 

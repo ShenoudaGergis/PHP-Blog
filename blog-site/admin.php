@@ -1,22 +1,20 @@
 <?php
 	require_once "./initializer.php";
-	require      "./check-block.php";
 	require_once "./utils/misc.php";
 	require      "./templates/header.php";
 	require_once "./templates/banner.php";
 	require_once "./templates/category-select-section.php";
 	require_once "./templates/tags-select-section.php";
-	require_once "./templates/pagination-section.php";
 	require_once "./templates/post-list.php";
 
 ?>
 
 <?php
-	if(!isset($_SESSION["user"])) {
+	if(!(isset($_SESSION["user"]) && ($connection->isUserAdmin($_SESSION["user"]["id"])))) {
 		header("Location: ./index.php");
 		die();
 	}
-	getBanner("MANAGE YOUR POSTS" , "YOUR POSTS");
+	getBanner("MANAGING SITE" , "CONTROL YOUR PREFERENCE");
 ?>
 
 <?php
@@ -35,7 +33,7 @@
 	$ppp   = 4;
 
 	$results  = $connection->getPost(
-					$_SESSION["user"]["id"] , 
+					null , 
 					$page * $ppp - $ppp , 
 					$ppp ,
 					$query ,
@@ -44,14 +42,13 @@
 				);
 
 	$posts    = ($results["state"] === 0) ? $results["data"] : [];
-
 ?>
 
 <section class="blog-posts">
     <div class="container">
 		<div class="row">
-		    <div class="col-lg-11 sidebar-item search">
-		        <form id="search_form" name="gs" method="GET" action="./dashboard.php">    
+		    <div class="col-lg-12 sidebar-item search">
+		        <form id="search_form" name="gs" method="GET" action="./admin.php">    
 		            <div class="row">
 
 		                <div class="col-lg-4" style="padding-bottom: 20px">
@@ -76,48 +73,67 @@
 		            </div>
 		        </form>
 		    </div>
-		    <div class="col-lg-1">
-				<button onclick="window.location.href = './new-post.php'" class="btn btn-outline-primary btn-block"><b>+</b></button>	    	
-		    </div>
+		</div>
+		<div class="row">
+			<div class="col-lg-2">
+				<span>Blocked User</span>			
+			</div>
+			<div class="col-lg-10">
+				<select id="usersBlk" multiple size="1">
+				<?php
+					foreach ($connection->getAllUsers()["data"] as $user) {
+						$id = intval($user["id"]);
+						if($id == $_SESSION["user"]["id"]) continue;
+						$username = $user["username"];
+						$r  = $connection->isUserBlocked($user["id"]);
+						if($r["state"] === 0) $userBlocked = $r["data"];
+						else break; 
+				?>
+		            <option onclick="toggleBlock(<?php echo $id; ?>)" <?php echo ($userBlocked) ? "selected" : ""; ?> value="<?php echo $id ?>"><?php echo $username . " ( ID: " . $id . " )" ?></option>
+		        <?php
+		    		}
+		    	?>
+		        </select>
+		        <script type="text/javascript">
+		        	new vanillaSelectBox("#usersBlk", {
+					    	"placeHolder"  :"Block User",
+					    	"disableSelectAll" : true ,
+					    	"translations": {"items": "Users"} ,
+					    	"search" : true ,
+					    }
+					);
+		        </script>
+			</div>
 		</div>
 		<br />
 
 		<div class="row">
 			<div class="col-lg-2">
-				<span>User Comments</span>
+				<span>Remove User</span>			
 			</div>
 			<div class="col-lg-8">
-				<select id="comments" class="form-control" multiple size="3">
-					<?php
-						$comments = $connection->getUserPostsComments($_SESSION["user"]["id"]);
-						if($comments["state"] === 0) {
-							foreach ($comments["data"] as $comment) {
-					?>
-
-					<option value="<?php echo $comment["id"];?>">
-						<?php 
-							echo "User: ( " . $comment["username"] . " ) At: ( " .
-								 $comment["comment_date"] . " ) Comment: ( " .
-								 $comment["comment"] . " ) On Post: ( " .
-								 $comment["title"] . " )."
-
-						?>	
-					</option>
-
-					<?php
-							}
-						}
-					?>
-				</select>
+				<select class="form-control form-select-lg" id="users" multiple size="3">
+				<?php
+					foreach ($connection->getAllUsers()["data"] as $user) {
+						$id = intval($user["id"]);
+						if($id == $_SESSION["user"]["id"]) continue;
+						$username = $user["username"];
+				?>
+		            <option value="<?php echo $id ?>"><?php echo $username . " ( ID: " . $id . " )" ?></option>
+		        <?php
+		    		}
+		    	?>
+		    	</select>
 			</div>
 			<div class="col-lg-2">
-				<button onclick="removeComments()" class="btn btn-outline-warning btn-block">Delete</button>
+                <button onclick="removeUsers();" class="btn btn-block btn-md btn-outline-warning" type="submit">Remove</button>
 			</div>
 		</div>
 		<br />
 
+
 		<?php
-			listPosts($posts , $_SESSION["user"]["id"] , "./dashboard.php" , $page , $ppp , $query , $category , $tag);
+			listPosts($posts , null , "./admin.php" , $page , $ppp , $query , $category , $tag);
 		?>
 
     </div>

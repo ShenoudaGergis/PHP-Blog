@@ -1,5 +1,6 @@
 <?php
     require_once "./initializer.php";
+    require      "./check-block.php";
     require "./templates/header.php";
 ?>
 

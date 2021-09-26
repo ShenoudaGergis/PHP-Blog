@@ -1,5 +1,6 @@
 <?php
     require_once "./initializer.php";
+    require      "./check-block.php";
     require      "./templates/header.php";
     require_once "./templates/banner.php";
     require_once "./templates/search-section.php";
@@ -40,7 +41,7 @@
                         <div class="col-lg-12">
                             <div class="blog-post">
                                 <div class="blog-thumb">
-                                    <img src="assets/images/blog-post-02.jpg" alt="">
+                                    <img src="<?php echo "./post-images/" . $post["image"] ?>" alt="">
                                 </div>
                                 <div class="down-content">
                                     <span><?php echo $post["category_name"]; ?></span>
@@ -93,9 +94,20 @@
                                         $count = $r["data"]; 
                                         echo '<i id="postLikes">' . $count .' Likes </i>';        
                                     }
-
                                 ?>
-
+                                <?php
+                                if(!($_SESSION["user"]["id"] == $post["user_id"])) {
+                                    $r = $connection->doesUserFollow($_SESSION["user"]["id"] , $post["user_id"]);
+                                    if($r["state"] === 0) {
+                                        $inner = ($r["data"]) ? "UnFollow" : "Follow";
+                                ?>
+                                    <button id="followBtn" onclick="toggleFollowing(<?php echo $post["user_id"];?>)" style="float: right;margin-right: 5px;" class="btn btn-md btn-primary">
+                                       <?php echo $inner; ?> 
+                                    </button>
+                                <?php
+                                    }    
+                                }
+                                ?>
                             </div>
                         </div>
                 
@@ -127,7 +139,25 @@
                                             </p>
                                         </div>
                                     </li>
-                                
+                                    
+                                    <div>
+                                        <?php
+                                            if(isset($_SESSION["user"])) {
+                                                $r = $connection->userLikesComment($_SESSION["user"]["id"] , $comment["id"]);
+                                                if($r["state"] === 0) {
+                                                    $inner = ($r["data"]) ? "Dislike" : "Like"; 
+                                                    echo '<button id="likeCommentBtn'. $comment["id"] .'" onclick="toggleCommentLike('. $comment["id"] .')" style="float: right;" class="btn btn-sm btn-outline-primary">'. $inner .'</button>';        
+                                                }
+                                            }
+                                            $r = $connection->getCommentLikes($comment["id"]);
+                                            if($r["state"] === 0) {
+                                                $count = $r["data"]; 
+                                                echo '<i id="commentLikes' . $comment["id"] . '">' . $count .' Likes </i>';        
+                                            }
+                                        ?>                                        
+                                    </div>
+                                    <br />
+                                    <hr />
                                 <?php
                                     }
                                 ?>
@@ -142,7 +172,7 @@
                                     <h2>Your comment</h2>
                                 </div>
                                 <div class="content">
-                                    <form id="comment" action="sendComment.php" method="post">
+                                    <form id="comment" action="comment.php" method="post">
                                         <div class="row">
                                             <input type="hidden" name="id" value="<?php echo $post["id"]; ?>">
                                             <div class="col-lg-12">

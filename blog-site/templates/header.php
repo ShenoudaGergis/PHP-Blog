@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="assets/css/fontawesome.css">
     <link rel="stylesheet" href="assets/css/templatemo-stand-blog.css">
     <link rel="stylesheet" href="assets/css/owl.css">
+    <link rel="stylesheet" href="assets/css/vanillaSelectBox.css">
+    <script src="assets/js/vanillaSelectBox.js"></script>
 
 
   </head>
@@ -26,13 +28,15 @@
   <body>
 
     <!-- ***** Preloader Start ***** -->
-<!--     <div id="preloader">
+    
+    <div id="preloader">
         <div class="jumper">
             <div></div>
             <div></div>
             <div></div>
         </div>
-    </div>   -->
+    </div>
+
     <!-- ***** Preloader End ***** -->
 
     <!-- Header -->

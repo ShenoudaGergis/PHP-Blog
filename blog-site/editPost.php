@@ -18,7 +18,9 @@ require_once "./templates/tags-select-section.php";
 	}
 
 	if($_SERVER["REQUEST_METHOD"] === "POST") {
+		$oldImage = false;
 		$r = fetchParams([
+			"id"       => ["number" , null] ,
 			"title"    => ["string" , null] ,
 			"content"  => ["string" , null] ,
 			"category" => ["number" , null] , 
@@ -29,6 +31,19 @@ require_once "./templates/tags-select-section.php";
 		if($r["content"]  === null) $errors[] = "content";
 		if($r["category"] === null) $errors[] = "category";
 		if($r["tag"]      === null) $errors[] = "tag";
+		
+		//if post id not belongs to the current user then redirect
+		if($r["id"] !== null) {
+			$belongs = $connection->doesUserOwnPost($_SESSION["user"]["id"] , $r["id"]);
+			if(!(($belongs["state"] === 0) && ($belongs["data"]))) {
+				header("Location: ./index.php");
+				die();			
+			}  
+		} else {
+			header("Location: ./index.php");
+			die();			
+		}
+
 		if(isset($_FILES["image"]) && ($_FILES["image"]["error"] == 0)) {
 			if(!\validation\isFileImage($_FILES["image"]["tmp_name"]))
 				$errors[] = "image";
@@ -38,7 +53,7 @@ require_once "./templates/tags-select-section.php";
 				if(!$move) $errors[] = "image";
 			}
 		} else {
-			$errors[] = "image";
+			$oldImage = true;
 		}
 
 		if(count($errors) === 0) {
@@ -52,14 +67,9 @@ require_once "./templates/tags-select-section.php";
 		}
 
 		if(count($errors) === 0) {
-			$r = $connection->addPost(
-				$_SESSION["user"]["id"] , 
-				$r["title"] ,
-				$r["content"] ,
-				$imageName ,
-				$r["category"] ,
-				$r["tag"]
-			);
+			$r = $connection->updatePost($r["id"] , $r["title"] , $r["content"] , ($oldImage) ? null : $imageName , $r["category"] , $r["tag"]);
+
+			print_r($r);
 			if($r["state"] === -1) $errors[] = "process";
 			else {
 				header("Location: ./index.php");
@@ -67,12 +77,34 @@ require_once "./templates/tags-select-section.php";
 			}
 		}
 
+	} else if($_SERVER["REQUEST_METHOD"] === "GET") {
+		$id = fetchParams([
+			"id" => ["number" , null]
+		])["id"];
+		if($id === null) {
+			header("Location: ./index.php");
+			die();
+		}
+
+		$post = $connection->getPost($id);
+		if(($post["state"] === -1) || (count($post["data"]) === 0)) {
+			header("Location: ./index.php");
+			die();			
+		}
+
+		$r = [];
+		$r["id"]       = $id;
+		$r["title"]    = $post["data"][0]["post_title"];
+		$r["content"]  = $post["data"][0]["content"];
+		$r["tag"]      = $connection->getPostTagsIDs($id)["data"];
+		$r["category"] = $connection->getPostCategoryID($id)["data"];
+
 	}
 ?>
 
 
 <?php
-	getBanner("NEW POST" , "PUBLISH NEW POST");
+	getBanner("EDIT POST" , "CHANGE YOUR POST ENTRIES");
 ?>
 
 <br />
@@ -81,7 +113,7 @@ require_once "./templates/tags-select-section.php";
 		if(in_array("process" , $errors)) {
 	?>
 	<div class="col-md-12 alert alert-danger" role="alert">
-		Cannot Create Post
+		Cannot Edit Post
 	</div>
 	<?php
 	}
@@ -90,10 +122,11 @@ require_once "./templates/tags-select-section.php";
 
 
 <div style="padding: 30px;">
-	<h4>Create New Post</h4><br /><br />
+	<h4>Edit Post</h4><br /><br />
 	
 
-	<form action="./new-post.php" method="post" enctype="multipart/form-data">
+	<form action="./editPost.php" method="post" enctype="multipart/form-data">
+		<input hidden name="id" value="<?php echo $r["id"]; ?>">
 		<div class="row">
 			<label class="col-md-1 form-label">Title</label>
 			<div class="col-md-8">
@@ -185,7 +218,7 @@ require_once "./templates/tags-select-section.php";
 
 		<br /><br />
 		<div class="col-md-9">
-			<button class="btn btn-primary btn-block" type="submit">Create New Post</button>		
+			<button class="btn btn-primary btn-block" type="submit">Edit Post</button>		
 		</div>
 
 	</form>

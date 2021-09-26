@@ -1,5 +1,6 @@
 <?php
 require_once "./initializer.php";
+require      "./check-block.php";
 require_once "./utils/validate.php";
 require      "./templates/header.php";
 require_once "./templates/banner.php";
