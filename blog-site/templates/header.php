@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 
   <head>
@@ -50,7 +50,7 @@
           <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="index.php">Home</a>
+                    <a class="nav-link" href="index.php">Home<?php if(isset($_SESSION["user"])) echo " ( " . $_SESSION["user"]["username"] . " ) "; ?></a>
                 </li>
 
                 <li class="nav-item">

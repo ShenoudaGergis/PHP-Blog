@@ -10,7 +10,7 @@ function getRecentPostsSection() {
             <div class="content">
                 <ul>
                     <?php 
-                        $yourPosts = $connection->getPost($_SESSION["user"]["id"] , 0 , 6);
+                        $yourPosts = $connection->getPost([$_SESSION["user"]["id"] , false] , 0 , 6);
                         if($yourPosts["state"] === 0) {
                             for($i = 0; ($i < 3) && isset($yourPosts["data"][$i]) ;$i++) {
                                 $post = $yourPosts["data"][$i];

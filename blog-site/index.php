@@ -1,5 +1,5 @@
 <?php
-    require_once "./initializer.php";
+    require_once "./utils/initializer.php";
     require      "./templates/header.php";
     require_once "./templates/banner.php";
     require_once "./templates/post-card.php";
@@ -21,7 +21,7 @@
             <div class="col-md-8">
 
                 <?php 
-                    getPostsSection(null , "index.php");
+                    getPostsSection([$_SESSION["user"]["id"] , true] , "index.php"); //old was null for userID
                 ?>
 
             </div>

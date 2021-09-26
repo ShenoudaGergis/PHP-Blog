@@ -35,7 +35,7 @@
 	$ppp   = 4;
 
 	$results  = $connection->getPost(
-					$_SESSION["user"]["id"] , 
+					[$_SESSION["user"]["id"] , false] , 
 					$page * $ppp - $ppp , 
 					$ppp ,
 					$query ,
@@ -117,7 +117,7 @@
 		<br />
 
 		<?php
-			listPosts($posts , $_SESSION["user"]["id"] , "./dashboard.php" , $page , $ppp , $query , $category , $tag);
+			listPosts($posts , [$_SESSION["user"]["id"] , false] , "./dashboard.php" , $page , $ppp , $query , $category , $tag);
 		?>
 
     </div>

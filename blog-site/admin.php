@@ -33,7 +33,7 @@
 	$ppp   = 4;
 
 	$results  = $connection->getPost(
-					null , 
+					[null , false] , 
 					$page * $ppp - $ppp , 
 					$ppp ,
 					$query ,

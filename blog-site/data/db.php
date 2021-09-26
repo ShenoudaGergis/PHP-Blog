@@ -42,7 +42,7 @@ class DB {
 		$type
 	) {
 		$result = mysqli_query($this->conn ,
-			sprintf("INSERT INTO users (id , name , username , password , email , phone , type) VALUES (null , '%s' , '%s' , '%s' , '%s' , %d , %d);" , 
+			sprintf("INSERT INTO users (id , name , username , password , email , phone , type , blocked) VALUES (null , '%s' , '%s' , '%s' , '%s' , %d , %d , 0);" , 
 					$name , $username , md5($password) , $email , $phone , $type
 		));
 
@@ -204,9 +204,19 @@ class DB {
 					$builder .= str_replace("#" , $args[3] , " AND posts.content LIKE '%#%'");
 
 			case 3:
-				if($args[0] !== null) 
-					$builder  .= " AND users.id = $args[0]";
-				$builder .= " ORDER BY posts.publish_date DESC LIMIT $args[1] , $args[2]";
+				if($args[0][0] !== null) {
+					if($args[0][1] === false) {
+						$builder .= " AND users.id = " . $args[0][0];
+						$builder .= " ORDER BY posts.publish_date DESC";
+					}
+					else {
+						$builder .= " ORDER BY CASE WHEN posts.user_id IN (SELECT following_id FROM follows WHERE follower_id = ". $args[0][0] .") THEN 1 ELSE 2 END ASC";
+					}
+				} else $builder .= " ORDER BY posts.publish_date DESC";
+				
+				$builder .= " LIMIT $args[1] , $args[2]";
+				
+				// echo $builder;
 				break;
 
 			case 2:
@@ -229,7 +239,8 @@ class DB {
 				    	posts.title AS post_title ,
 				    	posts.content , 
 				    	users.name AS user_name , 
-				    	posts.publish_date
+				    	posts.publish_date ,
+				    	posts.updated_at
 					FROM posts
 					JOIN users on users.id = posts.user_id
 					JOIN categories on categories.id = posts.category_id
@@ -723,7 +734,7 @@ class DB {
 
 $connection = new DB();
 // print_r($connection->getRecentPosts(0 , 4));
-// print_r($connection->getPost(5 , 0 , 10 , null , null , [1 , 2]));
+// print_r($connection->getPost([50 , true] , 0 , 100 , null , null , null));
 // print_r($connection->addComment(10 , 6 , "by the name of jesus christ"));
 // print_r($connection->getUserPosts(10));
 // print_r($connection->getTags());
